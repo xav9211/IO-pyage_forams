@@ -1,0 +1,9 @@
+set term png size 2000,1500
+set output 'wykres4.png'
+set xlabel "Number of iteration" font "Arial-Bold,13"
+set ylabel "Stats" font "Arial-Bold,13"
+set title "Stats of simulation" font "Arial-Bold,13"
+unset logscale x
+unset logscale y
+set key left top
+plot 'result.txt' using 1:2 w l title "Form", 'result.txt' using 1:3 w l title "Energy"

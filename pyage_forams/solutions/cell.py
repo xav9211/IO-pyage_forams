@@ -1,5 +1,5 @@
 import logging
-from pyage.core.inject import Inject
+# from pyage.core.inject import Inject
 
 from pyage.core.address import Addressable
 
@@ -8,9 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 class Cell(Addressable):
-    @Inject("algae_limit", "cell_capacity")
-    def __init__(self, algae=0):
+    # @Inject("algae_limit", "cell_capacity")
+    def __init__(self, algae=0, algae_limit=20, cell_capacity=5):
         super(Cell, self).__init__()
+        self.algae_limit = algae_limit
+        self.cell_capacity = cell_capacity
         self._algae = algae
         self.forams = set()
         self._neighbours = []
