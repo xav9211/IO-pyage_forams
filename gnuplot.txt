@@ -1,5 +1,5 @@
 set term png size 2000,1500
-set output 'wykres4.png'
+set output 'wykres_4.png'
 set xlabel "Number of iteration" font "Arial-Bold,13"
 set ylabel "Stats" font "Arial-Bold,13"
 set title "Stats of simulation" font "Arial-Bold,13"

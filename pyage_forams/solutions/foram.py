@@ -93,7 +93,7 @@ class Foram(Addressable):
 
     def _move(self):
         try:
-            if self.energy < self.movement_energy:
+            if self.energy < self.cell.get_movement_energy():
                 logger.warning("%s has no energy to move" % self)
                 return
             empty_neighbours = filter(lambda c: not c.is_full(), self.cell.get_neighbours())
@@ -106,7 +106,7 @@ class Foram(Addressable):
                            s.available_food() for s in c.get_neighbours()))
             if cell:
                 cell.insert_foram(self.cell.remove_foram(self))
-                self.energy -= self.movement_energy
+                self.energy -= self.cell.get_movement_energy()
                 logger.debug("%s moved" % self)
         except:
             logging.exception("could not move")

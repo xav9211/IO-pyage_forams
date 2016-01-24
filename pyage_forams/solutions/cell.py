@@ -1,5 +1,5 @@
 import logging
-# from pyage.core.inject import Inject
+from pyage.core.inject import Inject
 
 from pyage.core.address import Addressable
 
@@ -8,11 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 class Cell(Addressable):
-    # @Inject("algae_limit", "cell_capacity")
-    def __init__(self, algae=0, algae_limit=20, cell_capacity=5):
+    @Inject("movement_energy", "algae_limit", "cell_capacity")
+    def __init__(self, algae=0, cell_size=1):
         super(Cell, self).__init__()
-        self.algae_limit = algae_limit
-        self.cell_capacity = cell_capacity
+        self.cell_max = self.cell_capacity * cell_size
+        self.cell_algae_limit = self.algae_limit * cell_size
+        self.cell_movement_energy = self.movement_energy * cell_size
         self._algae = algae
         self.forams = set()
         self._neighbours = []
@@ -33,7 +34,7 @@ class Cell(Addressable):
         return not self.forams
 
     def is_full(self):
-        return len(self.forams) >= self.cell_capacity
+        return len(self.forams) >= self.cell_max
 
     def take_algae(self, demand):
         to_let = min(demand, self._algae)
@@ -45,7 +46,7 @@ class Cell(Addressable):
 
     def add_algae(self, algae):
         self._algae += algae
-        self._algae = min(self._algae, self.algae_limit)
+        self._algae = min(self._algae, self.cell_algae_limit)
 
     def available_food(self):
         return self._algae + sum(map(lambda c: c.get_algae(), self._neighbours))
@@ -55,6 +56,9 @@ class Cell(Addressable):
 
     def get_neighbours(self):
         return self._neighbours
+
+    def get_movement_energy(self):
+        return self.cell_movement_energy
 
     def to_shadow(self):
         return self.get_address(), self.available_food(), self._algae, self.is_full(), [cell.get_address() for cell in

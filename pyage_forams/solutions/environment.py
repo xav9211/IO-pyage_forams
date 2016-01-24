@@ -1,5 +1,6 @@
 import logging
 from random import randint, choice, random
+import math
 
 from pyage.core.inject import Inject
 from pyage_forams.solutions.cell import Cell
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractEnvironment(object):
-    @Inject("insolation_meter", "initial_algae_probability", "size", "algae_growth_probability")
+    @Inject("insolation_meter", "initial_algae_probability", "size", "algae_growth_probability", "length")
     def __init__(self, regeneration_factor):
         super(AbstractEnvironment, self).__init__()
         self.regeneration_factor = regeneration_factor
@@ -102,7 +103,7 @@ class Environment2d(AbstractEnvironment):
 class Environment3d(AbstractEnvironment):
     def __init__(self, regeneration_factor):
         super(Environment3d, self).__init__(regeneration_factor)
-        self.grid = self._initialize_grid()
+        self.grid = self._initialize_different_sized_grid()
 
     def _initialize_grid(self):
         grid = [[[Cell(randint(1, 4) if random() < self.initial_algae_probability else 0)
@@ -115,6 +116,42 @@ class Environment3d(AbstractEnvironment):
                         [grid[x][y][z] for x in range(max(0, i - 1), min(self.size[0], i + 2)) for y in
                          range(max(0, j - 1), min(self.size[1], j + 2)) for z in
                          range(max(0, k - 1), min(self.size[2], k + 2)) if x != i or y != j or z != k])
+
+        return grid
+
+    def _initialize_different_sized_grid(self):
+        grid = []
+
+        numberOfCells = 1
+        for i in range(self.length):
+            grid.append([[Cell(randint(1, 4) if random() < self.initial_algae_probability else 0, self.length - i)
+                          for _ in range(numberOfCells)] for _ in range(numberOfCells)])
+            numberOfCells *= 2
+
+        numberOfCells = 1
+        for i in range(self.length):
+            for j in range(numberOfCells):
+                for k in range(numberOfCells):
+                    grid[i][j][k].depth = self.size[0] - k - 1
+                    for x in range(max(0, i - 1), min(self.length, i + 2)):
+
+                        if x == i - 1:
+                            for y in range(max(0, int(math.ceil(j/2)) - 1), min(numberOfCells/2, int(math.ceil(j/2)) + 1)):
+                                for z in range(max(0, int(math.ceil(k/2)) - 1), min(numberOfCells/2, int(math.ceil(k/2)) + 1)):
+                                    grid[i][j][k]._neighbours.append(grid[x][y][z])
+
+                        elif x == i:
+                            for y in range(max(0, j - 1), min(numberOfCells, j + 2)):
+                                for z in range(max(0, k - 1), min(numberOfCells, k + 2)):
+                                    if y != j or z != k:
+                                        grid[i][j][k]._neighbours.append(grid[x][y][z])
+
+                        elif x == i + 1:
+                            for y in range(max(0, 2 * j - 1), min(2 * numberOfCells, 2 * j + 3)):
+                                for z in range(max(0, 2 * k - 1), min(2 * numberOfCells, 2 * k + 3)):
+                                    grid[i][j][k]._neighbours.append(grid[x][y][z])
+
+            numberOfCells *= 2
 
         return grid
 
